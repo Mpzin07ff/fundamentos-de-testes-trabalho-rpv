@@ -48,49 +48,50 @@ const quartos: IQuarto[] = [
 // ==================== FUNÇÃO A IMPLEMENTAR ====================
 
 function calcularReserva(reserva: IReserva): IResultadoReserva {
-    // TODO: Implementar a lógica seguindo as regras de negócio
-    //
-    // Passos sugeridos:
     const resultadoInvalido = {
         valorDiaria: 0,
         valorTotal: 0,
         desconto: 0,
         ehValida: false
     }
+
     const {cafeDaManha, hospedes, mes, noites, quartoId} = reserva
 
     // 1. Buscar o quarto pelo quartoId
-    const quartoEscolhido = quartos.find((q) => q.id === quartoId)    
+    const quartoEscolhido = quartos.find((q) => q.id === quartoId)
     
     // 2. Validar: quarto existe, noites entre 1-30, hóspedes dentro da capacidade
-    if (!quartoEscolhido) return resultadoInvalido
+    if(!quartoEscolhido) return resultadoInvalido
     if(noites < 1 || noites > 30) return resultadoInvalido
     if(hospedes > quartoEscolhido.capacidade || hospedes <= 0) return resultadoInvalido
-    if(mes < 1 || mes > 12 ) return resultadoInvalido
+    if(mes < 1 || mes > 12) return resultadoInvalido
 
     // 3. Calcular valor da diária base (precoNoite do quarto)
-    let somarDiariaBase = quartoEscolhido.precoNoite * noites
+    let somaDiariasBase = quartoEscolhido.precoNoite * noites
+
     // 4. Se alta temporada (mes 12, 1 ou 2): diária *= 1.30
-     let acrescimoAltaTemporada = 0 
-     if(mes === 12 || mes === 1) acrescimoAltaTemporada = somarDiariaBase * 0.3
+    let acrescimoAltaTemporada = 0
+    if(mes === 12 || mes === 1 || mes === 2) acrescimoAltaTemporada = somaDiariasBase * 0.3
 
     // 5. Se 3+ noites: desconto = 10% sobre (diária × noites)
     let desconto3Noites = 0
-    if(noites >= 3) desconto3Noites = (somarDiariaBase + acrescimoAltaTemporada) * 0.1
+    if(noites >= 3) desconto3Noites = (somaDiariasBase + acrescimoAltaTemporada) * 0.1
 
     // 6. Se café da manhã: adicionar R$ 30 por noite
     let valorCafeDaManha = 0
     if(cafeDaManha) valorCafeDaManha = 30 * noites
 
     // 7. Calcular valorTotal: (diária × noites) - desconto + (café × noites)
-    const valorTotal = somarDiariaBase + acrescimoAltaTemporada - desconto3Noites + valorCafeDaManha
+    const valorTotal = somaDiariasBase + acrescimoAltaTemporada - desconto3Noites + valorCafeDaManha
+
     return {
-        valorDiaria: 0,
-        valorTotal: 0,
-        desconto: 0,
-        ehValida: false
+        valorDiaria: somaDiariasBase,
+        valorTotal,
+        desconto: desconto3Noites,
+        ehValida: true
     }
 }
+
 
 // ==================== TESTES ====================
 
