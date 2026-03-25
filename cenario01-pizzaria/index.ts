@@ -50,27 +50,69 @@ const cardapio: IPizza[] = [
 
 // ==================== FUNÇÃO A IMPLEMENTAR ====================
 
-function calcularPedido(pedido: IPedido): IResultadoPedido {
-    // TODO: Implementar a lógica seguindo as regras de negócio
-    //
-    // Passos sugeridos:
-    // 1. Verificar se o pedido é válido (não vazio, dentro do limite de 5 pizzas)
-    // 2. Calcular o subtotal (somar quantidade × preço de cada pizza + borda se aplicável)
-    // 3. Verificar se o subtotal atinge o pedido mínimo (R$ 20,00)
-    // 4. Contar quantas pizzas G ou GG existem no pedido (soma das quantidades)
-    // 5. Se 2+ pizzas G/GG: desconto = 10% do subtotal
-    // 6. Calcular taxa de entrega: R$ 7,00 ou grátis se subtotal > R$ 80,00
-    // 7. Calcular valor total: subtotal - desconto + taxaEntrega
-
-    return {
+function calcularPedido({ itens }: IPedido): IResultadoPedido {
+    const resultadoInvalido = {
         subtotal: 0,
         desconto: 0,
         taxaEntrega: 0,
         valorTotal: 0,
         ehValido: false
     }
-}
+    // TODO: Implementar a lógica seguindo as regras de negócio
+    //
+    // Passos sugeridos:
+    // 1. Verificar se o pedido é válido (não vazio, dentro do limite de 5 pizzas)
+    let qPizzas = 0
 
+    itens.forEach((item) => {
+        qPizzas += item.quantidade
+    });
+    if((cardapio.length === 0) || (qPizzas === 0) || (qPizzas > 5)){
+        return resultadoInvalido
+    }
+
+
+    let subtotal = 0
+    let qPizzasGrande = 0
+
+    itens.forEach((item) => {
+        cardapio.forEach((pizza) => {
+            if(item.pizzaId === pizza.id){
+                // 2. Calcular o subtotal (somar quantidade × preço de cada pizza + borda se aplicável)
+                item.bordaRecheada ? subtotal += (pizza.preco * item.quantidade) + (8 * item.quantidade): subtotal += pizza.preco * item.quantidade 
+                
+                // 3. Contar quantas pizzas G ou GG existem no pedido (soma das quantidades)
+                if (pizza.tamanho === 'G' || pizza.tamanho === 'GG') {
+                    qPizzasGrande += item.quantidade
+                }            
+            }
+        })
+    })
+
+    // 4. Verificar se o subtotal atinge o pedido mínimo (R$ 20,00)
+    if(subtotal < 20){
+        return resultadoInvalido
+    }
+
+    // 5. Se 2+ pizzas G/GG: desconto = 10% do subtotal
+    let desconto = 0
+    qPizzasGrande >= 2 ? desconto = subtotal * 0.1 : ''
+
+    // 6. Calcular taxa de entrega: R$ 7,00 ou grátis se subtotal > R$ 80,00
+    let taxaEntrega = 0
+    subtotal > 80 ? taxaEntrega = 0 : taxaEntrega = 7
+
+    // 7. Calcular valor total: subtotal - desconto + taxaEntrega
+    let valorTotal = subtotal - desconto + taxaEntrega
+
+    return {
+        subtotal,
+        desconto,
+        taxaEntrega,
+        valorTotal,
+        ehValido: true
+    }
+}
 // ==================== TESTES ====================
 
 // Teste 1: Pedido simples 1 pizza P sem borda — com frete
